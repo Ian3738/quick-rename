@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>快速檔名系統</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+</head>
+<body>
+<header>
+  <h1>快速檔名系統</h1>
+  <p class="subtitle">PDF / Word 自動抽取內容 → 套用命名規則 <code>序號-項目-學年-名稱</code></p>
+</header>
+
+<main>
+  <section class="drop-zone" id="dropZone">
+    <div class="drop-inner">
+      <div class="drop-icon">＋</div>
+      <p><strong>拖曳檔案到這裡</strong>，或<button type="button" class="link-btn" id="pickBtn">點擊選擇</button></p>
+      <p class="hint">支援 PDF、DOCX，可一次選多個</p>
+      <input type="file" id="fileInput" accept=".pdf,.docx" multiple hidden>
+    </div>
+  </section>
+
+  <section class="panel" id="defaultsPanel">
+    <h2>批次預設值（可一鍵套用到所有檔案）</h2>
+    <div class="row">
+      <label>
+        預設項目
+        <select id="defaultCategory">
+          <option value="">— 不套用 —</option>
+        </select>
+      </label>
+      <label>
+        預設學年
+        <select id="defaultYear">
+          <option value="">— 不套用 —</option>
+        </select>
+      </label>
+      <button type="button" class="btn" id="applyDefaultsBtn">套用到全部</button>
+      <button type="button" class="btn ghost" id="renumberBtn">重新編號</button>
+      <button type="button" class="btn ghost" id="manageOptionsBtn">管理選項</button>
+    </div>
+  </section>
+
+  <section class="panel hidden" id="filesPanel">
+    <div class="panel-head">
+      <h2>檔案列表 <span class="count" id="fileCount">0</span></h2>
+      <div class="actions">
+        <button type="button" class="btn primary" id="downloadAllBtn">下載全部 (ZIP)</button>
+        <button type="button" class="btn ghost danger" id="clearBtn">清除全部</button>
+      </div>
+    </div>
+    <div class="files-list" id="filesList"></div>
+  </section>
+
+  <section class="panel hidden" id="emptyState">
+    <p class="empty">還沒有檔案，先上傳幾個吧。</p>
+  </section>
+</main>
+
+<!-- 管理選項對話框 -->
+<dialog id="optionsDialog">
+  <form method="dialog">
+    <h2>管理下拉選項</h2>
+    <div class="dialog-section">
+      <h3>項目（可新增 / 刪除）</h3>
+      <div id="categoryChips" class="chips"></div>
+      <div class="add-row">
+        <input type="text" id="newCategoryInput" placeholder="新增項目名稱">
+        <button type="button" class="btn" id="addCategoryBtn">新增</button>
+      </div>
+    </div>
+    <div class="dialog-section">
+      <h3>學年</h3>
+      <div id="yearChips" class="chips"></div>
+      <div class="add-row">
+        <input type="text" id="newYearInput" placeholder="例如 114" inputmode="numeric">
+        <button type="button" class="btn" id="addYearBtn">新增</button>
+      </div>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn primary" value="ok">完成</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>

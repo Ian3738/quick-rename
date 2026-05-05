@@ -397,6 +397,141 @@ dialog h3 {
 
 .actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
+/* 檔案檢視對話框 */
+#viewerDialog {
+  width: min(1200px, 96vw);
+  max-width: 96vw;
+  height: 90vh;
+  max-height: 90vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#viewerDialog[open] {
+  display: flex;
+}
+
+.viewer-head {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.viewer-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  word-break: break-all;
+}
+
+.viewer-name-row {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  background: #fafbfd;
+  flex-wrap: wrap;
+}
+
+.viewer-name-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.viewer-name-row label.grow { flex: 1; min-width: 240px; }
+
+.viewer-name-row input[type="text"] {
+  width: 100%;
+  font-size: 14px;
+}
+
+.viewer-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 0;
+}
+
+.viewer-pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.viewer-pane + .viewer-pane {
+  border-left: 1px solid var(--border);
+}
+
+.pane-head {
+  padding: 8px 14px;
+  font-size: 12px;
+  color: var(--muted);
+  background: #f4f6fb;
+  border-bottom: 1px solid var(--border);
+}
+
+.pane-content {
+  flex: 1;
+  overflow: auto;
+  background: #fff;
+}
+
+.pane-content.text {
+  padding: 12px 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  user-select: text;
+}
+
+.pane-content iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.docx-render {
+  padding: 18px 22px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.docx-render p { margin: 0 0 0.6em; }
+.docx-render h1, .docx-render h2, .docx-render h3 { margin: 1em 0 0.4em; }
+.docx-render table { border-collapse: collapse; margin: 8px 0; }
+.docx-render td, .docx-render th { border: 1px solid #cbd5e1; padding: 4px 8px; }
+
+.viewer-empty {
+  color: var(--muted);
+  padding: 24px;
+  text-align: center;
+}
+
+@media (max-width: 820px) {
+  .viewer-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .viewer-pane + .viewer-pane {
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+}
+
 @media (max-width: 720px) {
   .file-fields {
     grid-template-columns: 1fr 1fr;

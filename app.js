@@ -255,11 +255,17 @@ function renderCard(item, idx) {
   fields.appendChild(yearLabel);
   fields.appendChild(nameLabel);
 
-  // download single
-  const dl = document.createElement('div');
-  dl.innerHTML = `<button type="button" class="btn">下載</button>`;
-  dl.querySelector('button').addEventListener('click', () => downloadOne(item));
-  fields.appendChild(dl);
+  // actions: view + download
+  const acts = document.createElement('div');
+  acts.style.display = 'flex';
+  acts.style.gap = '6px';
+  acts.innerHTML = `
+    <button type="button" class="btn" data-act="view">檢視</button>
+    <button type="button" class="btn" data-act="download">下載</button>
+  `;
+  acts.querySelector('[data-act="view"]').addEventListener('click', () => openViewer(item));
+  acts.querySelector('[data-act="download"]').addEventListener('click', () => downloadOne(item));
+  fields.appendChild(acts);
 
   card.appendChild(fields);
 
@@ -475,3 +481,120 @@ addYearBtn.addEventListener('click', () => {
 
 newCategoryInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addCategoryBtn.click(); } });
 newYearInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addYearBtn.click(); } });
+
+// ===== 檔案檢視對話框 =====
+const viewerDialog = $('#viewerDialog');
+const viewerType = $('#viewerType');
+const viewerFileName = $('#viewerFileName');
+const viewerNameInput = $('#viewerNameInput');
+const viewerSaveBtn = $('#viewerSaveBtn');
+const viewerUseSelectionBtn = $('#viewerUseSelectionBtn');
+const viewerCloseBtn = $('#viewerClose');
+const viewerRendered = $('#viewerRendered');
+const viewerText = $('#viewerText');
+
+let currentViewerItem = null;
+let currentBlobUrl = null;
+
+async function openViewer(item) {
+  currentViewerItem = item;
+  viewerType.textContent = item.type.toUpperCase();
+  viewerFileName.textContent = item.file.name;
+  viewerNameInput.value = item.name || '';
+  viewerText.textContent = item.extractedText || '（尚未抽取文字）';
+  viewerRendered.innerHTML = '<div class="viewer-empty">載入中…</div>';
+
+  // 先打開對話框
+  if (typeof viewerDialog.showModal === 'function') viewerDialog.showModal();
+  else viewerDialog.setAttribute('open', '');
+
+  // 釋放上次的 blob
+  if (currentBlobUrl) {
+    URL.revokeObjectURL(currentBlobUrl);
+    currentBlobUrl = null;
+  }
+
+  try {
+    if (item.type === 'pdf') {
+      currentBlobUrl = URL.createObjectURL(item.file);
+      const iframe = document.createElement('iframe');
+      iframe.src = currentBlobUrl + '#view=FitH';
+      iframe.title = 'PDF 預覽';
+      viewerRendered.innerHTML = '';
+      viewerRendered.appendChild(iframe);
+    } else if (item.type === 'docx') {
+      const buf = await item.file.arrayBuffer();
+      const result = await mammoth.convertToHtml({ arrayBuffer: buf });
+      viewerRendered.innerHTML = `<div class="docx-render">${result.value || '<p class="viewer-empty">無內容</p>'}</div>`;
+    } else {
+      viewerRendered.innerHTML = '<div class="viewer-empty">無法預覽此類型</div>';
+    }
+  } catch (err) {
+    console.error(err);
+    viewerRendered.innerHTML = '<div class="viewer-empty">載入失敗</div>';
+  }
+}
+
+function closeViewer() {
+  if (typeof viewerDialog.close === 'function') viewerDialog.close();
+  else viewerDialog.removeAttribute('open');
+}
+
+viewerCloseBtn.addEventListener('click', () => {
+  // 不套用名稱，直接關閉
+  closeViewer();
+});
+
+viewerSaveBtn.addEventListener('click', () => {
+  if (currentViewerItem) {
+    currentViewerItem.name = viewerNameInput.value.trim();
+    renderFiles();
+  }
+  closeViewer();
+});
+
+viewerUseSelectionBtn.addEventListener('click', () => {
+  const text = readSelectionText();
+  if (text) {
+    viewerNameInput.value = text;
+    viewerNameInput.focus();
+  } else {
+    alert('請先在右側文字區或左側文件中選取要當名稱的文字。');
+  }
+});
+
+function readSelectionText() {
+  // 先看主視窗的選取
+  let s = (window.getSelection && window.getSelection().toString()) || '';
+  if (s.trim()) return cleanSelection(s);
+  // 再看 iframe 內（同源 blob 可讀）
+  const iframe = viewerRendered.querySelector('iframe');
+  if (iframe && iframe.contentWindow) {
+    try {
+      const sel = iframe.contentWindow.getSelection && iframe.contentWindow.getSelection();
+      if (sel) {
+        const t = sel.toString();
+        if (t.trim()) return cleanSelection(t);
+      }
+    } catch (e) {}
+  }
+  return '';
+}
+
+function cleanSelection(s) {
+  return s.replace(/\s+/g, ' ').trim().slice(0, 120);
+}
+
+viewerDialog.addEventListener('close', () => {
+  if (currentBlobUrl) {
+    URL.revokeObjectURL(currentBlobUrl);
+    currentBlobUrl = null;
+  }
+  viewerRendered.innerHTML = '';
+  currentViewerItem = null;
+});
+
+// 點擊對話框外側自動關閉
+viewerDialog.addEventListener('click', e => {
+  if (e.target === viewerDialog) closeViewer();
+});

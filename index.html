@@ -62,6 +62,35 @@
   </section>
 </main>
 
+<!-- 檔案檢視對話框 -->
+<dialog id="viewerDialog">
+  <div class="viewer-head">
+    <div class="viewer-title">
+      <span class="file-type-tag" id="viewerType">PDF</span>
+      <span id="viewerFileName"></span>
+    </div>
+    <button type="button" class="icon-btn" id="viewerClose" title="關閉">✕</button>
+  </div>
+  <div class="viewer-name-row">
+    <label class="grow">
+      <span>名稱（可以從下方文字選取貼到這裡）</span>
+      <input type="text" id="viewerNameInput" placeholder="貼上選取的文字當作檔名">
+    </label>
+    <button type="button" class="btn" id="viewerUseSelectionBtn">使用選取文字</button>
+    <button type="button" class="btn primary" id="viewerSaveBtn">套用並關閉</button>
+  </div>
+  <div class="viewer-body">
+    <div class="viewer-pane" id="viewerRenderedPane">
+      <div class="pane-head">原始檢視</div>
+      <div class="pane-content" id="viewerRendered"></div>
+    </div>
+    <div class="viewer-pane" id="viewerTextPane">
+      <div class="pane-head">抽取文字（可直接選取複製）</div>
+      <div class="pane-content text" id="viewerText"></div>
+    </div>
+  </div>
+</dialog>
+
 <!-- 管理選項對話框 -->
 <dialog id="optionsDialog">
   <form method="dialog">
